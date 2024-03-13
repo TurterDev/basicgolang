@@ -84,4 +84,146 @@ middlewares
 	-นำไปใช้งานที่ Server.go
 
 -ส้ราง Users Module
-	-
+	- module
+		|-users
+			|-usersHandlers
+				|-usersHandler.go
+			|-usersRepositiries
+				|-usersRepository.go
+			|-usersUsecases
+				|-usersUsecase.go
+		|-users.go
+- ประกาศ inteface, strut, constructor (usersRepository.go)
+- ประกาศ inteface, strut, constructor (usersUsecase.go)
+- ประกาศ inteface, strut, constructor (usersHandler.go)
+
+-ทำ fucn sign-up (สร้าง service สำหรับ sign-up) ที่ไฟล์ users.go
+	- สร้าง strut User
+	- สร้าง strut UserRegister
+	- สร้าง fucn สำหรับ hashpassword (BcryptHashing)
+	- สร้าง func สำหรับตรวจสอบ format email
+
+- สร้าง pettern แบบ design flegtory
+	-สร้าง foder (usersPetterns) 
+		|-users
+			|- usersPetterns
+				|-insertUser.go
+	-สร้าง interface (IInertUser) โดย return Interface
+	- เพิ้ม UserPassport ที่ไฟล์ users.go\
+	- เพิ่ม UserToken strut
+	- สร้าง private struct
+	- เขียน Query SQL สำหรับ Insert
+- นำ pettern ไปใช้นำ repo
+	- IUsersRepository เพิ่ม
+
+- เพิ่ม function ที่ interface IUserUsecase
+	- Hashing password
+	- insert User
+- เพิ่ม function ที่ interface IUsersHandler
+	- SignUpCustomer
+		- สร่้างenum
+		-Requst Body parser
+		-email validation
+		-Insert
+- เอา register ไปใช้งาน ไปที่ module.go
+	- ประกาศ func UsersModule() จะทำคล้ายๆกับ MonitorModule()
+	- ทำ route ให้เป็น /v1/users/signup 
+	- import UsersModule() ไปที่ไฟล์ server.go
+
+ทำระบบ Sign-In
+	- สร้าง struct ที่ไฟล์ users.go (UserCredentail) และ (UserCredentailCheck)
+	- usersRepository.go สร้าง function FindOneUserByEmail 
+- ไล่ทำจากข้างในไปข้างนอก Repo -> Usecase -> Hnadler -> Module
+- ที่ UsersUsecase
+	- สร้าง func GetPassport
+	- Find user ที่ UsersUsecase
+	- Set passport ที่ UsersUsecase
+	- Conmpare password ที่ UsersUsecase
+- ที่ usersHandler
+	- สร้าง func SignIn
+	- import module
+- ติดตั้ง JWT
+	-https://github.com/golang-jwt/jwt
+	- go get -u github.com/golang-jwt/jwt/v5
+- basicgolangauth
+	|- สร้างไฟล์ auth.go สำหรับ generate token
+- สร้าง struct UserClaims ที่ไฟล์ users.go
+- NewBasicgolangAuth
+- สร้าง func คำนวณวันหมดอายุ token (jwtTimeDurationCal)
+- สร้าง func สำหรับ refresh token (jwtTimeRepeatAdapter)
+- สร้าง func newAccessToken , newRefreshToken
+- สร้าง func SignToken
+
+- Generate Refresh Token
+- เอา pagekage ที่เขียนมาใช้ ที่ usersUsecase
+	- Sign Token
+
+- Oauth
+	- สร้าง func InsertOauth ที่ usersRepo
+	- เรียก func ไปใช้งานที่ usersUsecase
+
+- Refresh Token
+	- สร้าง struct UserFreshCredential
+	- สร้าง func สำหรับ checktoken ที่ auth.go (ParseToken)
+	- check error
+	- check type payload
+- Repeat Token (เพื่อเปลี่ยน refresh token ใหม่)
+	- สร้าง func RepeatToken
+- เรียกใช้งาน Refresh Token ที่ usersRepo (จะคล้ายกับที่เขียน Signin นิดหน่อย โดยเปลี่ยนจาก insert เป็น update)
+	- สร้าง func FindOneOauth ที่ usersRepo
+	- สร้าง struct Oauth ที่ users.go
+	- สร้าง func UpdateOauth
+- Check User สำหรับ Refresh Token
+	- Parse token
+	- Check Oauth
+	- Find Profile
+	- สร้าง func UpdateOauth
+	- เพิ่ม func Refresh ที่ interface
+- จัดการที่ส่วน usersHandlers.go
+	- จะคล้ายกับ SignIn (copy ได้เลย)
+	- สร้าง errCode เพิ่ม
+	- เพิ่ม func ที่ interface
+	- เพิ่ม Path ในส่วนของ module
+- ทำ SignOut ที่ usersRepo
+	- สร้าง func DeleteOauth
+	- สร้าง func DeleteOauth ต่อที่ usersUsecase
+	- สร้าง func ที่ usesHandler
+	- ไปที่ entities (users.go) สร้าง struct UserRemoveCredential เพิ่ม
+	- เพิ่ม Path ในส่วนของ module
+- ทำเพิ่ม admin
+	- สร้าง func Admin ที่ InsertUser.go
+	- ใช้ query เหมือน customer
+	- สร้าง func InsertAdmin ที่ usersUsecase
+	- สร้าง func SignUpAdmin ที่ usersHandler
+	- เพิ่ม middleware ที่ module ที่ไฟล์ module
+- ทำ Admin Token
+	- ที่ไฟล์ Auth.go สร้าง strut โดยครอบ basicAuth
+	- สร้าง interface เพิ่ม
+	- สร้าง func ในการ signtoken
+	- เพิ่ม func ในการ ParseToken
+	- สร้าง Service สำหรับ Generate Admin key ที่ usersHandler
+	- สร้าง func newAdminToken
+	- เพิ่ม Path GenerateAdminToken ที่ module
+- ทำ middleware Authentication
+	- สร้าง func FindAccessToken ที่ middlewareRepo
+	- สร้าง func FindAccessToken ที่ middlewareUsecase
+	- เพิม JwtAuth() ที่ interface middlewareHandler
+	- เพิม ErrCode JwtAuthErr
+	- สร้าง func JwtAuth()
+	- ที่ module เพิ่ม router.Get("/secret",m.mid.JwtAuth(), handler.GenerateAdminToken)
+- ทำ GetUserProfile
+	- สร้้าง func GetUserProfile ที่ userUsecase
+	- สร้าง func GetUserProfile ที่ userHandler
+- ทำ Params Check Middleware
+	- สร้าง func ParamsCheck ที่ middlewareHandler
+- ทำ Role-Based Authorization
+	- สร้าง func FindRole ที่ middlewareRepo ([]*middlewares.Role คือ slide ของ pointer role)
+	- ประกาศ type Role ที่ middlewares.go
+	- สร้าง func FindRole ที่ middlewareUsecase
+	- สร้าง func Authorize ที่ middlewareHandler (fucn Authorize จะทำเมื่อ JWTAuth เสร็จเรียบร้อยแล้ว) ตรง .(int) คือการแปลง type และ ...int คือการรับ type เดียวกันแบบไม่จำกัด
+	สร้าง func แปลงเลขฐาน 2 ที่ utils สร้างไฟล์ converter.go
+	- เรียกใช้งานที่ module.go
+
+
+
+

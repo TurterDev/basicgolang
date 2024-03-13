@@ -47,7 +47,9 @@ func (s *server) Start() {
 	//http:loacalhost:3000/v1
 	v1 := s.app.Group("v1")
 	modules := InitModule(v1, s, middlewares)
+
 	modules.MonitorModule()
+	modules.UsersModule()
 
 	//นำ Router Check มาใช้งาน
 	s.app.Use(middlewares.RouterCheck())
